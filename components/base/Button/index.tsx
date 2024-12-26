@@ -1,13 +1,13 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { ButtonProps, Pressable, StyleSheet, Text, View } from "react-native";
 import React, { CSSProperties, FC, ReactNode } from "react";
 import { theme } from "@/constants/theme";
 import { hp } from "@/helpers/common";
 import Loading from "../Loading";
 
-interface IButtonProps {
+interface IButtonProps extends ButtonProps {
   buttonStyle?: Record<string, any>;
   textStyle?: Record<string, any>;
-  title: string | ReactNode;
+  title: string;
   onPress: () => void;
   loading?: boolean;
   hasShadow?: boolean;

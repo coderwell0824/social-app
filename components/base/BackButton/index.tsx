@@ -28,7 +28,7 @@ export default BackButton;
 const styles = StyleSheet.create({
   button: {
     alignSelf: "flex-start",
-    padding: 5,
+    padding: 0,
     borderRadius: theme.radius.sm,
     // backgroundColor: "rgba(0,0,0,0.07)",
   },

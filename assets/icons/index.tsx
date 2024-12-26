@@ -3,6 +3,11 @@ import React, { ComponentType } from "react";
 import Home from "./components/Home";
 import { theme } from "@/constants/theme";
 import ArrowLeft from "./components/ArrowLeft";
+import Email from "./components/Email";
+import Lock from "./components/Lock";
+import Notification from "./components/Noticication";
+import AddCircleIcon from "./components/Add";
+import UserIcon from "./components/Account";
 
 const iconsMap: Record<
   string,
@@ -15,6 +20,11 @@ const iconsMap: Record<
 > = {
   home: Home,
   arrowLeft: ArrowLeft,
+  email: Email,
+  lock: Lock,
+  notification: Notification,
+  add: AddCircleIcon,
+  account: UserIcon,
 };
 
 interface IconProps {
