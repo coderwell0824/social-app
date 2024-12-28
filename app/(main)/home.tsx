@@ -12,15 +12,6 @@ const home = () => {
   const { setAuth } = useAuthStore();
   const router = useRouter();
 
-  const onLogout = async () => {
-    setAuth(null);
-    const { error } = await supabase.auth.signOut();
-
-    if (error) {
-      Alert.alert("Logout failed", error.message);
-    }
-  };
-
   const handlePress = (key: string) => {
     if (key == "notification") {
       router.push("/noticications");
@@ -32,15 +23,14 @@ const home = () => {
   };
 
   return (
-    <ScreenWrapper>
+    <ScreenWrapper bg="">
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.title}>LinkUp</Text>
           <View style={styles.icons}>
             {["notification", "add", "account"].map((item, index) => (
-              <Pressable onPress={() => handlePress(item)}>
+              <Pressable onPress={() => handlePress(item)} key={index}>
                 <Icon
-                  key={index}
                   name={item}
                   size={hp(3.2)}
                   stokeWidth={2}

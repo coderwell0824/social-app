@@ -8,6 +8,7 @@ import Lock from "./components/Lock";
 import Notification from "./components/Noticication";
 import AddCircleIcon from "./components/Add";
 import UserIcon from "./components/Account";
+import Logout from "./components/Logout";
 
 const iconsMap: Record<
   string,
@@ -25,6 +26,7 @@ const iconsMap: Record<
   notification: Notification,
   add: AddCircleIcon,
   account: UserIcon,
+  logout: Logout,
 };
 
 interface IconProps {
@@ -32,6 +34,7 @@ interface IconProps {
   size?: number;
   stokeWidth?: number;
   [key: string]: any;
+  color?: string;
 }
 
 const Icon = ({ name, size = 24, stokeWidth = 1.9, ...props }: IconProps) => {

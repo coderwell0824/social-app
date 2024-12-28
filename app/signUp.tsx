@@ -38,11 +38,11 @@ const SignUp = () => {
     } = await supabase.auth.signUp({
       email: formData.email,
       password: formData.password,
-      options: {
-        data: {
-          name: "123ssw",
-        },
-      },
+      // options: {
+      //   data: {
+      //     name: "123ssw",
+      //   },
+      // },
     });
 
     setLoading(false);
@@ -72,7 +72,7 @@ const SignUp = () => {
             Please fill the details to create an account
           </Text>
           <Input
-            icon={<Icon name="email" size={26} stokeWidth={1.6} />}
+            icon={<Icon name="account" size={26} stokeWidth={1.6} />}
             placeholder="Enter your username"
             value={formData.username}
             onChangeText={(val) => setFormData({ ...formData, username: val })}
