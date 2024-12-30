@@ -17,8 +17,6 @@ import { supabase } from "@/lib/supabase";
 import Avatar from "@/components/base/Avatar";
 import { router } from "expo-router";
 
-//TODO: email未同步
-
 const UserHeader = ({ user, handleLogout }: any) => {
   return (
     <View
@@ -43,28 +41,28 @@ const UserHeader = ({ user, handleLogout }: any) => {
               style={styles.editIcon}
               onPress={() => router.push("/editProfile")}
             >
-              <Icon name="email" stokeWidth={2.5} size={20} />
+              <Icon name="edit" stokeWidth={2.5} size={20} />
             </Pressable>
           </View>
 
           <View style={{ alignItems: "center", gap: 4 }}>
-            <Text style={styles.userName}>{user && user?.name}xxx</Text>
-            <Text style={styles.infoText}>{user && user?.address}xxxx</Text>
+            <Text style={styles.userName}>{user && user?.name}</Text>
+            <Text style={styles.infoText}>{user && user?.address}</Text>
           </View>
 
           <View style={{ gap: 10 }}>
             <View style={styles.info}>
               <Icon name="email" size={20} color={theme.colors.textLight} />
-              <Text style={styles.infoText}>{user && user?.email}xxx</Text>
+              <Text style={styles.infoText}>{user && user?.email}</Text>
             </View>
             {user && user?.phoneNumber && (
               <View style={styles.info}>
                 <Icon name="email" size={20} color={theme.colors.textLight} />
-                <Text style={styles.infoText}>{user?.phoneNumber}xx1x</Text>
+                <Text style={styles.infoText}>{user?.phoneNumber}</Text>
               </View>
             )}
             {user && user?.bio && (
-              <Text style={styles.infoText}>{user?.bio}xx1x</Text>
+              <Text style={styles.infoText}>{user?.bio}</Text>
             )}
           </View>
         </View>

@@ -1,19 +1,29 @@
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import React, { useEffect, useState } from "react";
+import {
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import React, { useEffect, useMemo, useState } from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import { hp, wp } from "@/helpers/common";
 import { theme } from "@/constants/theme";
 import Header from "@/components/Header";
 import { Image } from "expo-image";
-import { getUserImageSrc } from "@/service/user";
+import { getUserImageSrc, updateUserDataById } from "@/service/user";
 import { useAuthStore } from "@/store/useAuthStore";
 import Icon from "@/assets/icons";
 import { useDeepCompareEffect } from "ahooks";
 import Input from "@/components/base/Input";
 import Button from "@/components/base/Button";
+import { router } from "expo-router";
+import * as ImagePicker from "expo-image-picker";
+import { uploadFile } from "@/service/upload";
 
 const EditProfile = () => {
-  const { userData } = useAuthStore();
+  const { userData, setUserData } = useAuthStore();
   const [loading, setLoading] = useState<boolean>(false);
   const [userFormData, setUserFormData] = useState({
     name: "",
@@ -35,9 +45,56 @@ const EditProfile = () => {
     }
   }, [userData]);
 
-  const onPickImage = () => {};
+  const imagePreview =
+    userFormData.image && typeof userFormData?.image == "object"
+      ? userFormData?.image?.uri
+      : getUserImageSrc(userData?.image);
 
-  const onSubmit = () => {};
+  const onPickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: true,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      aspect: [4, 3],
+      quality: 0.7,
+    });
+
+    if (!result.canceled) {
+      setUserFormData({
+        ...userFormData,
+        image: result?.assets?.[0] as any,
+      });
+    }
+  };
+
+  const onSubmit = async () => {
+    const newData = { ...userFormData };
+    if (
+      !newData.name ||
+      !newData.address ||
+      !newData.bio ||
+      !newData.phoneNumber
+    ) {
+      Alert.alert("Profile", "Please fill all the fields");
+      return;
+    }
+    setLoading(true);
+
+    // if (typeof newData.image === "object") {
+    //   const imageRes = await uploadFile("profiles", newData?.image?.uri, true);
+    //   if (imageRes?.success) {
+    //     newData.image = imageRes.data;
+    //   } else {
+    //     newData.image = null;
+    //   }
+    // }
+    const res = await updateUserDataById(userData?.id, newData);
+    setLoading(false);
+
+    if (res.success) {
+      setUserData({ ...userData, ...newData }); //更新store中的用户信息
+      router.back();
+    }
+  };
 
   return (
     <ScreenWrapper>
@@ -47,10 +104,7 @@ const EditProfile = () => {
 
           <View style={styles.form}>
             <View style={styles.avatarContainer}>
-              <Image
-                source={getUserImageSrc(userData?.image)}
-                style={styles.avatar}
-              />
+              <Image source={imagePreview} style={styles.avatar} />
               <Pressable style={styles.cameraIcon} onPress={onPickImage}>
                 <Icon name="email" size={20} stokeWidth={2.5} />
               </Pressable>

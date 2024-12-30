@@ -16,7 +16,7 @@ const home = () => {
     if (key == "notification") {
       router.push("/noticications");
     } else if (key == "add") {
-      router.push("/noticications");
+      router.push("/newPost");
     } else {
       router.push("/profile");
     }

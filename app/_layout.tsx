@@ -18,7 +18,7 @@ const _layout = () => {
         router.replace("/home");
       } else {
         setAuth(null);
-        router.replace("/home");
+        router.replace("/welcome");
       }
     });
   }, []);

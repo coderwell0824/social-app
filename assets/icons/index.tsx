@@ -9,6 +9,7 @@ import Notification from "./components/Noticication";
 import AddCircleIcon from "./components/Add";
 import UserIcon from "./components/Account";
 import Logout from "./components/Logout";
+import EditIcon from "./components/Edit";
 
 const iconsMap: Record<
   string,
@@ -27,6 +28,7 @@ const iconsMap: Record<
   add: AddCircleIcon,
   account: UserIcon,
   logout: Logout,
+  edit: EditIcon,
 };
 
 interface IconProps {
