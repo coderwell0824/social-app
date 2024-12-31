@@ -13,7 +13,7 @@ interface IRichTextEditorProps {
 }
 
 const RichTextEditor: FC<IRichTextEditorProps> = ({ editRef, onChange }) => {
-  console.log(editRef, "editRef");
+  // console.log(editRef, "editRef");
 
   return (
     <View style={{ minHeight: 285 }}>

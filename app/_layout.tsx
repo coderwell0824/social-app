@@ -3,6 +3,15 @@ import { Stack, useRouter } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { useAuthStore } from "@/store/useAuthStore";
 import { getUserDataByUserId } from "@/service/user";
+import { LogBox } from "react-native";
+
+//TODO:LogBox可以用来忽略日志警告
+
+LogBox.ignoreLogs([
+  "Warning: TNodeChildrenRenderer",
+  "Warning: MemoizedTNodeRendere",
+  "Warning: TRenderEngineProvider",
+]);
 
 const _layout = () => {
   const { setAuth, setUserData } = useAuthStore();
@@ -33,7 +42,13 @@ const _layout = () => {
       screenOptions={{
         headerShown: false,
       }}
-    />
+    >
+      {/* 不同页面的展示形式 */}
+      <Stack.Screen
+        name="(main)/postDetail"
+        options={{ presentation: "modal" }}
+      />
+    </Stack>
   );
 };
 

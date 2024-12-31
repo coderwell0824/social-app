@@ -10,6 +10,10 @@ import AddCircleIcon from "./components/Add";
 import UserIcon from "./components/Account";
 import Logout from "./components/Logout";
 import EditIcon from "./components/Edit";
+import FavouriteIcon from "./components/Heart";
+import Comment from "./components/Comment";
+import Share from "./components/Share";
+import MenuTwoLineIcon from "./components/Control";
 
 const iconsMap: Record<
   string,
@@ -29,6 +33,10 @@ const iconsMap: Record<
   account: UserIcon,
   logout: Logout,
   edit: EditIcon,
+  heart: FavouriteIcon,
+  comment: Comment,
+  share: Share,
+  menu: MenuTwoLineIcon,
 };
 
 interface IconProps {

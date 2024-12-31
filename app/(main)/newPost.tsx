@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Image,
   Pressable,
+  Alert,
 } from "react-native";
 import React, { useRef, useState } from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
@@ -20,13 +21,15 @@ import * as ImagePicker from "expo-image-picker";
 import Button from "@/components/base/Button";
 import { getFileType, getFileUri } from "@/utils/file";
 import { Video } from "expo-av";
+import { createOrUpdatePost } from "@/service/post";
+import { router } from "expo-router";
 
 const NewPost = () => {
   const editRef = useRef(null);
   const bodyRef = useRef<any>("");
   const { userData } = useAuthStore();
   const [loading, setLoading] = useState<boolean>(false);
-  const [file, setFile] = useState<any>("");
+  const [file, setFile] = useState<any>(null);
 
   const onPick = async (isPickImage: boolean) => {
     let mediaConfig;
@@ -51,7 +54,34 @@ const NewPost = () => {
     }
   };
 
-  const onSubmit = () => {};
+  const onSubmit = async () => {
+    // console.log("onSubmit", bodyRef.current, file);
+
+    if (!bodyRef.current) {
+      Alert.alert("Post", "please choose an image file or add post body");
+      return;
+    }
+
+    setLoading(true);
+
+    const data = {
+      file,
+      body: bodyRef.current,
+      userId: userData?.id,
+    };
+
+    const res = await createOrUpdatePost(data);
+    setLoading(false);
+
+    if (res?.success) {
+      setFile(null);
+      bodyRef.current = null;
+      editRef.current?.setContentHTML("");
+      router.back();
+    } else {
+      Alert.alert("Post", res?.message);
+    }
+  };
 
   return (
     <ScreenWrapper bg="white">
@@ -65,9 +95,7 @@ const NewPost = () => {
               rounded={theme.radius.xl}
             />
             <View style={{ gap: 2 }}>
-              <Text style={styles.username}>
-                {userData && userData?.name}11
-              </Text>
+              <Text style={styles.username}>{userData && userData?.name}</Text>
               <Text style={styles.publicText}>Public</Text>
             </View>
           </View>
