@@ -6,3 +6,8 @@ TODO 上传文件有问题
 
 TODO
 import { useFocusEffect } from "@react-navigation/native";
+
+查询: getXXX queryXXX
+删除: removeXXX deleteXXX
+新增: createXXX addXXX
+更新: updateXXX

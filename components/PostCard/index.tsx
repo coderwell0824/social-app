@@ -1,11 +1,12 @@
 import {
+  Alert,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
   ViewStyle,
 } from "react-native";
-import React, { FC } from "react";
+import React, { FC, useEffect, useState } from "react";
 import { theme } from "@/constants/theme";
 import { hp, wp } from "@/helpers/common";
 import Avatar from "../base/Avatar";
@@ -16,11 +17,15 @@ import { Image } from "expo-image";
 import { getSupabaseFileUrl } from "@/service/common";
 import { Video } from "expo-av";
 import { router } from "expo-router";
+import { operatorLikePost } from "@/service/post";
 
 interface IPostCardProps {
   item: any;
   currentUser: any;
   hasShadow?: boolean;
+  showDelete?: boolean;
+  onDelete?: (postItem: any) => void;
+  onEdit?: (postItem: any) => void;
 }
 
 const textStyles = {
@@ -40,23 +45,80 @@ const tagsStyles = {
   },
 };
 
-const PostCard: FC<IPostCardProps> = ({ item, currentUser, hasShadow }) => {
-  const shadowStyles: ViewStyle = {
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 1,
-  };
+const shadowStyles: ViewStyle = {
+  shadowOffset: {
+    width: 0,
+    height: 2,
+  },
+  shadowOpacity: 0.06,
+  shadowRadius: 6,
+  elevation: 1,
+};
+
+const PostCard: FC<IPostCardProps> = ({
+  item,
+  currentUser,
+  hasShadow,
+  showDelete = false,
+  onDelete,
+  onEdit,
+}) => {
+  const [likes, setLikes] = useState<any[]>([]);
+
+  useEffect(() => {
+    setLikes(item?.likes || []);
+  }, []);
 
   const openPostDetail = () => {
     router.push({ pathname: "/postDetail", params: { postId: item?.id } });
   };
 
-  const likes = [];
-  const liked = false;
+  const liked = likes?.filter((like) => like.userId == currentUser?.id)[0]
+    ? true
+    : false;
+
+  const onLike = async () => {
+    if (liked) {
+      //remove like
+      const updatedLiked = likes.filter(
+        (like) => like?.userId != currentUser?.id
+      );
+      setLikes([...updatedLiked]);
+      //TODO: 优化传参类型
+      const res = await operatorLikePost(!liked, {}, item?.id, currentUser?.id);
+      if (!res.success) Alert.alert("Post", "Something went wrong");
+    } else {
+      const data = {
+        userId: currentUser?.id,
+        postId: item?.id,
+      };
+      setLikes([...likes, data]);
+      const res = await operatorLikePost(!liked, data);
+      if (!res.success) Alert.alert("Post", "Something went wrong");
+    }
+
+    //TODO: 点赞新增提醒
+    //TODO: 获取新数据
+  };
+
+  const onShare = () => {
+    // const content={message:stri}
+  };
+
+  const handleDelete = () => {
+    Alert.alert("Confirm", "Are you sure you want to delete?", [
+      {
+        text: "Cancel",
+        onPress: () => {},
+        style: "cancel",
+      },
+      {
+        text: "Delete",
+        onPress: () => onDelete?.(item),
+        style: "destructive",
+      },
+    ]);
+  };
 
   const showMedia = () => {
     if (item?.file && item?.file?.includes("postImages")) {
@@ -91,6 +153,27 @@ const PostCard: FC<IPostCardProps> = ({ item, currentUser, hasShadow }) => {
             <Text style={styles.username}>{item?.user?.name}</Text>
             <Text style={styles.postTime}>{dayjs().format("MM:D")}</Text>
           </View>
+
+          {showDelete && currentUser?.id == item?.userId && (
+            <View style={styles.actions}>
+              <TouchableOpacity onPress={() => onEdit?.(item)}>
+                <Icon
+                  name="edit"
+                  size={hp(2.5)}
+                  stokeWidth={3}
+                  color={theme.colors.text}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleDelete}>
+                <Icon
+                  name="delete"
+                  size={hp(2.5)}
+                  stokeWidth={3}
+                  color={theme.colors.rose}
+                />
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
 
         <TouchableOpacity onPress={openPostDetail}>
@@ -119,7 +202,7 @@ const PostCard: FC<IPostCardProps> = ({ item, currentUser, hasShadow }) => {
 
       <View style={styles.footer}>
         <View style={styles.footerButton}>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={onLike}>
             <Icon
               name="heart"
               size={24}
@@ -133,7 +216,9 @@ const PostCard: FC<IPostCardProps> = ({ item, currentUser, hasShadow }) => {
           <TouchableOpacity onPress={openPostDetail}>
             <Icon name="comment" size={24} color={theme.colors.textLight} />
           </TouchableOpacity>
-          <Text style={styles.count}>{likes.length || 0}</Text>
+          <Text style={styles.count}>
+            {(item?.comments && item?.comments[0]?.count) || 0}
+          </Text>
         </View>
         <View style={styles.footerButton}>
           <TouchableOpacity>
@@ -205,7 +290,9 @@ const styles = StyleSheet.create({
   },
   actions: {
     flexDirection: "row",
+    marginLeft: "auto",
     alignItems: "center",
+    justifyContent: "flex-end",
     gap: 18,
   },
   count: {

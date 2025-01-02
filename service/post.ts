@@ -32,26 +32,67 @@ export const createOrUpdatePost = async (post: { file: any, body: any }) => {
   }
 }
 
-export const queryPostList = async (limit: number = 10) => {
-
+export const deletePost = async (postItem?: any) => {
   try {
     const { data, error } = await supabase.from("posts")
-      .select("*,user: users (id, name, image)").order("created_at", { ascending: false }).limit(limit)
+      .delete().eq("id", postItem?.id);
 
     if (error) {
-      console.log("queryPost error:", error);
-      return { success: false, message: "Could not query your post" }
+      console.log("posts error:", error);
+      return { success: false, message: "Could not remove your posts" }
     }
 
     return { success: true, data }
   } catch (error) {
-    console.log("queryPost error:", error);
-    return { success: false, message: "Could not query your post" }
+    console.log("posts error:", error);
+    return { success: false, message: "Could not remove your posts" }
   }
 }
 
-export const operatorLikePost = async (isLike = true, postLike: Record<string, any>) => {
+export const queryPostList = async (limit: number = 10, userId?: string) => {
+  if (userId) {
+    try {
+      const { data, error } = await supabase.from("posts")
+        .select(`*,
+          user: users (id, name, image),
+          postLikes (*),
+          comments (count)`)
+        .order("created_at", { ascending: false }).eq("userId", userId).limit(limit)
 
+      if (error) {
+        console.log("queryPost error:", error);
+        return { success: false, message: "Could not query your post" }
+      }
+
+      return { success: true, data }
+    } catch (error) {
+      console.log("queryPost error:", error);
+      return { success: false, message: "Could not query your post" }
+    }
+  } else {
+    try {
+      const { data, error } = await supabase.from("posts")
+        .select(`*,
+          user: users (id, name, image),
+          postLikes (*),
+          comments (count)`)
+        .order("created_at", { ascending: false }).limit(limit)
+
+      if (error) {
+        console.log("queryPost error:", error);
+        return { success: false, message: "Could not query your post" }
+      }
+
+      return { success: true, data }
+    } catch (error) {
+      console.log("queryPost error:", error);
+      return { success: false, message: "Could not query your post" }
+    }
+  }
+}
+
+//操作
+export const operatorLikePost = async (isLike = true, postLike?: Record<string, any>, postId?: string, userId?: string) => {
   try {
     if (isLike) {
       const { data, error } = await supabase.from("postLikes")
@@ -62,6 +103,15 @@ export const operatorLikePost = async (isLike = true, postLike: Record<string, a
       }
 
       return { success: true, data }
+    } else {
+      const { error } = await supabase.from("postLikes")
+        .delete().eq("userId", userId).eq("postId", postId)
+      if (error) {
+        console.log("operator Like Post error:", error);
+        return { success: false, message: "Could not operator Like Post " }
+      }
+
+      return { success: true }
     }
   } catch (error) {
     console.log("operator Like Post error:", error);
@@ -69,11 +119,18 @@ export const operatorLikePost = async (isLike = true, postLike: Record<string, a
   }
 }
 
+//获取海报的详情
 export const getPostDetailById = async (postId: string) => {
 
   try {
     const { data, error } = await supabase.from("posts")
-      .select("*,user: users (id, name, image)").eq("id", postId).single();
+      .select(`*,
+        user: users (id, name, image),
+        postLikes (*),
+        comments (*, user:users (id, name, image))`)
+      .eq("id", postId)
+      .order("created_at", { ascending: false, foreignTable: "comments" })
+      .single();
 
     if (error) {
       console.log("queryDetailPost error:", error);
@@ -85,4 +142,40 @@ export const getPostDetailById = async (postId: string) => {
     console.log("queryDetailPost error:", error);
     return { success: false, message: "Could not query your post" }
   }
+}
+
+
+export const createComment = async (comment: Record<string, any>) => {
+  try {
+    const { data, error } = await supabase.from("comments")
+      .insert(comment).select().single();
+
+    if (error) {
+      console.log("comment error:", error);
+      return { success: false, message: "Could not insert your comment" }
+    }
+
+    return { success: true, data }
+  } catch (error) {
+    console.log("comment error:", error);
+    return { success: false, message: "Could not insert your comment" }
+  }
+}
+
+export const removeComment = async (commentId: string) => {
+  try {
+    const { data, error } = await supabase.from("comments")
+      .delete().eq("id", commentId);
+
+    if (error) {
+      console.log("comment error:", error);
+      return { success: false, message: "Could not remove your comment" }
+    }
+
+    return { success: true, data }
+  } catch (error) {
+    console.log("comment error:", error);
+    return { success: false, message: "Could not remove your comment" }
+  }
+
 }

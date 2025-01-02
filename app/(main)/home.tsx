@@ -18,6 +18,7 @@ import PostCard from "@/components/PostCard";
 import Loading from "@/components/base/Loading";
 import { getUserDataByUserId } from "@/service/user";
 import { useChannel } from "@/hooks/useChannel";
+import { useMount } from "ahooks";
 
 const home = () => {
   const { userData } = useAuthStore();
@@ -35,12 +36,14 @@ const home = () => {
       router.push("/profile");
     }
   };
+  //TODO: 每次更新时需要考虑获取最新数据
+  useMount(() => {
+    getPostList();
+  });
 
   const getPostList = async () => {
     setLimit((limit) => limit + 8);
-
     if (!hasMore) return null;
-
     const res = await queryPostList(limit + 8);
     if (res.success) {
       if (postList.length == res.data?.length) setHasMore(false);
@@ -51,21 +54,57 @@ const home = () => {
   };
 
   const handlePostEventChange = async (payload: Record<string, any>) => {
-    console.log(payload, "payload");
-
     if (payload?.eventType == "INSERT" && payload?.new?.id) {
       const newPost = { ...payload?.new };
       const res = await getUserDataByUserId(newPost?.userId);
+      newPost.postLikes = [];
+      newPost.comments = [{ count: 0 }];
       newPost.user = res.success ? res.data : {};
       setPostList((prevPosts) => [newPost, ...prevPosts]);
     }
+
+    if (payload?.eventType == "DELETE" && payload?.old?.id) {
+      setPostList((prevPosts) => {
+        const updatePostList = prevPosts?.filter(
+          (post) => post.id != payload?.old?.id
+        );
+
+        return updatePostList;
+      });
+    }
+
+    if (payload?.eventType == "UPDATE" && payload?.new?.id) {
+      setPostList((prevPosts) => {
+        const updatePostList = prevPosts?.map((post) => {
+          if (post.id == payload?.new?.id) {
+            post.body = payload?.new?.body;
+            post.file = payload?.new?.file;
+          }
+          return post;
+        });
+        return updatePostList;
+      });
+    }
   };
+
+  const handleCommentEventChange = () => {};
 
   //在FlatList中调用了获取列表的接口, 在Effect中就不需要重新调用
   useChannel(
     "posts",
     { event: "*", schema: "public", table: "posts" },
     handlePostEventChange
+  );
+
+  useChannel(
+    "notications",
+    {
+      event: "INSERT",
+      schema: "public",
+      table: "notications",
+      filter: `reveiverId=eq.${userData?.id}`,
+    },
+    handleCommentEventChange
   );
 
   return (

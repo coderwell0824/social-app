@@ -14,6 +14,10 @@ import FavouriteIcon from "./components/Heart";
 import Comment from "./components/Comment";
 import Share from "./components/Share";
 import MenuTwoLineIcon from "./components/Control";
+import SentIcon from "./components/Send";
+import DeleteIcon from "./components/Delete";
+import ImageIcon from "./components/Image";
+import VideoIcon from "./components/video";
 
 const iconsMap: Record<
   string,
@@ -37,6 +41,10 @@ const iconsMap: Record<
   comment: Comment,
   share: Share,
   menu: MenuTwoLineIcon,
+  send: SentIcon,
+  delete: DeleteIcon,
+  image: ImageIcon,
+  video: VideoIcon,
 };
 
 interface IconProps {

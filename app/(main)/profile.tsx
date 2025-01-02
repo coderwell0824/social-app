@@ -1,12 +1,14 @@
 import {
   Alert,
+  FlatList,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Header from "@/components/Header";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -16,6 +18,9 @@ import { theme } from "@/constants/theme";
 import { supabase } from "@/lib/supabase";
 import Avatar from "@/components/base/Avatar";
 import { router } from "expo-router";
+import { queryPostList } from "@/service/post";
+import PostCard from "@/components/PostCard";
+import Loading from "@/components/base/Loading";
 
 const UserHeader = ({ user, handleLogout }: any) => {
   return (
@@ -73,6 +78,9 @@ const UserHeader = ({ user, handleLogout }: any) => {
 
 const Profile = () => {
   const { userData, setAuth } = useAuthStore();
+  const [posts, setPost] = useState<any[]>([]);
+  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [limit, setLimit] = useState<number>(0);
 
   const onLogout = async () => {
     setAuth(null);
@@ -80,6 +88,23 @@ const Profile = () => {
 
     if (error) {
       Alert.alert("Logout failed", error.message);
+    }
+  };
+
+  useEffect(() => {
+    getPostList();
+  }, []);
+
+  const getPostList = async () => {
+    setLimit((limit) => limit + 8);
+    if (!hasMore) return null;
+    const res = await queryPostList(limit + 8, userData?.id);
+    if (res.success) {
+      console.log(res.data);
+      if (posts.length == res.data?.length) setHasMore(false);
+      setPost(res.data as any);
+    } else {
+      setPost([]);
     }
   };
 
@@ -100,7 +125,32 @@ const Profile = () => {
 
   return (
     <ScreenWrapper bg="white">
-      <UserHeader user={userData} handleLogout={handleLogout} />
+      <FlatList
+        ListHeaderComponent={
+          <UserHeader user={userData} handleLogout={handleLogout} />
+        }
+        ListHeaderComponentStyle={{ marginBottom: 30 }}
+        data={posts}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.listStyle}
+        keyExtractor={(item) => item?.id?.toString()}
+        renderItem={({ item }) => (
+          <PostCard item={item} currentUser={userData} />
+        )}
+        onEndReached={() => getPostList()}
+        onEndReachedThreshold={0}
+        ListFooterComponent={
+          hasMore ? (
+            <View style={{ marginVertical: !posts.length ? 300 : 30 }}>
+              <Loading />
+            </View>
+          ) : (
+            <View style={{ marginVertical: 30 }}>
+              <Text style={styles.noPosts}>到底了~</Text>
+            </View>
+          )
+        }
+      />
     </ScreenWrapper>
   );
 };

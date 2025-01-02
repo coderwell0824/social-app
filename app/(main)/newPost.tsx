@@ -8,7 +8,7 @@ import {
   Pressable,
   Alert,
 } from "react-native";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import { hp, wp } from "@/helpers/common";
 import { theme } from "@/constants/theme";
@@ -22,14 +22,31 @@ import Button from "@/components/base/Button";
 import { getFileType, getFileUri } from "@/utils/file";
 import { Video } from "expo-av";
 import { createOrUpdatePost } from "@/service/post";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
+import { getSupabaseFileUrl } from "@/service/common";
 
 const NewPost = () => {
   const editRef = useRef(null);
-  const bodyRef = useRef<any>("");
+  const [bodyHtml, setBodyHtml] = useState<any>("");
+
   const { userData } = useAuthStore();
   const [loading, setLoading] = useState<boolean>(false);
   const [file, setFile] = useState<any>(null);
+  const postItem = useLocalSearchParams();
+  const isEdit = !Object.keys(postItem).length ? false : true;
+  console.log(isEdit, "post");
+
+  useEffect(() => {
+    if (isEdit) {
+      setBodyHtml(postItem?.body);
+      // TODO: 重点: 对于未挂载的元素使用setTimeout
+      setTimeout(() => {
+        //@ts-ignore
+        editRef.current?.setContentHTML(postItem?.body);
+      }, 300);
+      setFile(postItem?.file);
+    }
+  }, []);
 
   const onPick = async (isPickImage: boolean) => {
     let mediaConfig;
@@ -55,27 +72,28 @@ const NewPost = () => {
   };
 
   const onSubmit = async () => {
-    // console.log("onSubmit", bodyRef.current, file);
-
-    if (!bodyRef.current) {
+    if (!bodyHtml) {
       Alert.alert("Post", "please choose an image file or add post body");
       return;
     }
 
     setLoading(true);
 
-    const data = {
+    let data: any = {
       file,
-      body: bodyRef.current,
+      body: bodyHtml,
       userId: userData?.id,
     };
+
+    if (isEdit) data.id = postItem?.id;
 
     const res = await createOrUpdatePost(data);
     setLoading(false);
 
     if (res?.success) {
       setFile(null);
-      bodyRef.current = null;
+      setBodyHtml(null);
+      //@ts-ignore
       editRef.current?.setContentHTML("");
       router.back();
     } else {
@@ -86,7 +104,7 @@ const NewPost = () => {
   return (
     <ScreenWrapper bg="white">
       <View style={styles.container}>
-        <Header title="Create Post" />
+        <Header title={isEdit ? "Update Post" : "Create Post"} />
         <ScrollView contentContainerStyle={{ gap: 20 }}>
           <View style={styles.header}>
             <Avatar
@@ -103,7 +121,7 @@ const NewPost = () => {
           <View style={styles.textEditor}>
             <RichTextEditor
               editRef={editRef}
-              onChange={(val) => (bodyRef.current = val)}
+              onChange={(val) => setBodyHtml(val)}
             />
           </View>
 
@@ -125,7 +143,7 @@ const NewPost = () => {
                 />
               )}
               <Pressable style={styles.closeIcon} onPress={() => setFile(null)}>
-                <Icon name="email" size={20} color="white" />
+                <Icon name="delete" size={20} color="white" />
               </Pressable>
             </View>
           )}
@@ -134,17 +152,17 @@ const NewPost = () => {
             <Text style={styles.addImageText}>Add to your post</Text>
             <View style={styles.mediaIcons}>
               <TouchableOpacity onPress={() => onPick(true)}>
-                <Icon name="email" size={30} color={theme.colors.dark} />
+                <Icon name="image" size={30} color={theme.colors.dark} />
               </TouchableOpacity>
               <TouchableOpacity onPress={() => onPick(false)}>
-                <Icon name="email" size={30} color={theme.colors.dark} />
+                <Icon name="video" size={30} color={theme.colors.dark} />
               </TouchableOpacity>
             </View>
           </View>
         </ScrollView>
         <Button
           buttonStyle={{ height: hp(6.2) }}
-          title="Create"
+          title={isEdit ? "Update" : "Create"}
           loading={loading}
           hasShadow={false}
           onPress={onSubmit}
