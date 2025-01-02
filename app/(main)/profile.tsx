@@ -62,7 +62,7 @@ const UserHeader = ({ user, handleLogout }: any) => {
             </View>
             {user && user?.phoneNumber && (
               <View style={styles.info}>
-                <Icon name="email" size={20} color={theme.colors.textLight} />
+                <Icon name="phone" size={20} color={theme.colors.textLight} />
                 <Text style={styles.infoText}>{user?.phoneNumber}</Text>
               </View>
             )}

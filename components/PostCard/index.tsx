@@ -18,6 +18,8 @@ import { getSupabaseFileUrl } from "@/service/common";
 import { Video } from "expo-av";
 import { router } from "expo-router";
 import { operatorLikePost } from "@/service/post";
+import { useAuthStore } from "@/store/useAuthStore";
+import { createNotification } from "@/service/notications";
 
 interface IPostCardProps {
   item: any;
@@ -97,7 +99,19 @@ const PostCard: FC<IPostCardProps> = ({
       if (!res.success) Alert.alert("Post", "Something went wrong");
     }
 
-    //TODO: 点赞新增提醒
+    if (currentUser?.id !== item?.user?.id) {
+      const notify = {
+        senderId: currentUser?.id,
+        receiverId: currentUser?.id,
+        title: "liked on  your post",
+        data: JSON.stringify({
+          postId: item?.id,
+          commentId: null,
+        }),
+      };
+
+      createNotification(notify);
+    }
     //TODO: 获取新数据
   };
 
@@ -151,7 +165,9 @@ const PostCard: FC<IPostCardProps> = ({
           />
           <View style={{ gap: 2 }}>
             <Text style={styles.username}>{item?.user?.name}</Text>
-            <Text style={styles.postTime}>{dayjs().format("MM:D")}</Text>
+            <Text style={styles.postTime}>
+              {dayjs(item?.created_at).format("MM/DD HH:mm")}
+            </Text>
           </View>
 
           {showDelete && currentUser?.id == item?.userId && (

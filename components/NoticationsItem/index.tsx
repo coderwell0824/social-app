@@ -13,7 +13,9 @@ interface INoticationsItemProps {
 const NoticationsItem: FC<INoticationsItemProps> = ({ item }) => {
   const onClick = () => {
     const { postId, commentId } = JSON.parse(item?.data);
-    router.push({ pathname: "/postDetail", params: { postId, commentId } });
+    if (commentId) {
+      router.push({ pathname: "/postDetail", params: { postId, commentId } });
+    }
   };
 
   return (
@@ -26,7 +28,7 @@ const NoticationsItem: FC<INoticationsItemProps> = ({ item }) => {
         </Text>
       </View>
       <Text style={[styles.text, { color: theme.colors.textLight }]}>
-        {dayjs(item?.created_at).format("MM-DD HH:mm")}
+        {dayjs(item?.created_at).format("MM/DD HH:mm")}
       </Text>
     </TouchableOpacity>
   );

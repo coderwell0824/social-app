@@ -18,6 +18,7 @@ import SentIcon from "./components/Send";
 import DeleteIcon from "./components/Delete";
 import ImageIcon from "./components/Image";
 import VideoIcon from "./components/video";
+import SmartPhoneIcon from "./components/phone";
 
 const iconsMap: Record<
   string,
@@ -45,6 +46,7 @@ const iconsMap: Record<
   delete: DeleteIcon,
   image: ImageIcon,
   video: VideoIcon,
+  phone: SmartPhoneIcon,
 };
 
 interface IconProps {

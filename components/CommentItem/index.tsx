@@ -19,7 +19,7 @@ const CommentItem: FC<ICommentProps> = ({
   onDelete,
   hightlight = false,
 }) => {
-  const createAt = dayjs(item?.created_at).format("MM-DD HH:mm");
+  const createAt = dayjs(item?.created_at).format("MM/DD HH:mm");
 
   const handleDelete = () => {
     Alert.alert("Confirm", "Are you sure you want to delete?", [
